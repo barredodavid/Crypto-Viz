@@ -1,0 +1,43 @@
+version: '3'
+services:
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+    networks:
+      - mynetwork  # Assurez-vous que le service scraper est sur le même réseau
+
+  analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+    networks:
+      - mynetwork  # Assurez-vous que le service analytics est sur le même réseau
+
+  viewer:
+    build:
+      context: ./viewer
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - scraper
+      - analytics
+    networks:
+      - mynetwork  # Assurez-vous que le service viewer est sur le même réseau
+
+  rabbitmq:
+    image: "rabbitmq:management"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - mynetwork  # Assurez-vous que RabbitMQ est sur le même réseau
+
+networks:
+  mynetwork:
+    driver: bridge  # Vous pouvez aussi utiliser le driver "bridge" pour le réseau
